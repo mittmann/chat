@@ -13,11 +13,11 @@
 int main(int argc, char** argv)
 {
 
-	int accept, sock, ret, len;
+	int accept_sock, sock, ret, len;
 	char buffer[BUFFER_SIZE];
 	struct sockaddr_in sv_addr, cl_addr;
 
-	accept = socket(AF_INET, SOCK_STREAM, 0);
+	accept_sock = socket(AF_INET, SOCK_STREAM, 0);
 
 
 
@@ -28,22 +28,20 @@ int main(int argc, char** argv)
 
 
 
-	if (!bind(accept, (struct sockaddr *) &sv_addr, sizeof(sv_addr)))
+	if (!bind(accept_sock, (struct sockaddr *) &sv_addr, sizeof(sv_addr)))
 		puts("erro no bind");
 
 
-	listen(accept, 5);
+	listen(accept_sock, 5);
 
 	len = sizeof(cl_addr);
 
 
-	sock = accept(accept, &cl_addr, len, NULL);
+	sock = accept(accept_sock, &cl_addr, len);
 	if (sock < 0)
 		{
 			puts("erro no accept") ;
 		}
-
-
 
 	ret = recvfrom(sock, buffer, BUFFER_SIZE, 0, NULL, NULL);
 
