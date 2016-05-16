@@ -14,5 +14,6 @@ int main(int argc, char** argv)
 
 	accept = socket(AF_INET, SOCK_STREAM, 0);
 
+    puts("teste");
 
 }
