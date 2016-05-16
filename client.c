@@ -20,10 +20,10 @@
 
 int main (int argc, char **argv) {
     int sockfd, n;
-    struct sockaddr_in serveraddr;
+    struct sockaddr_in serv_addr;
     struct hostent *server;
     char *hostname;
-    char buf[BUFSIZE];
+    char buffer[BUFSIZE];
     
     if (argc != 2) {
         fprintf(stderr, "uso: %s <endereço>\n", argv[0]);
@@ -32,7 +32,7 @@ int main (int argc, char **argv) {
     hostname = argv[1];
     
     server = gethostbyname(hostname);
-    if (server = NULL) {
+    if (server == NULL) {
         fprintf (stderr, "ERRO, endereço %s não encontrado \n", hostname);
         exit(0);
     }
