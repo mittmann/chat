@@ -31,17 +31,20 @@ int main (int argc, char **argv) {
     }
     hostname = argv[1];
     
+    puts ( "teste");
     server = gethostbyname(hostname);
     if (server == NULL) {
         fprintf (stderr, "ERRO, endereço %s não encontrado \n", hostname);
         exit(0);
     }
-    
+    puts ( "teste2");
+
     if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
         printf("ERRO abrindo o socket\n");
         exit(0);
     }
-    
+    puts ( "teste3");
+
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(PORT);
     serv_addr.sin_addr = *((struct in_addr *)server->h_addr);

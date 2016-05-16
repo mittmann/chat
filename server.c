@@ -17,44 +17,52 @@ int main(int argc, char** argv)
 	char buffer[BUFFER_SIZE];
 	struct sockaddr_in sv_addr, cl_addr;
 
-	accept_sock = socket(AF_INET, SOCK_STREAM, 0);
+    if ((accept_sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+        printf("ERRO abrindo socket");
 
 
-
-	memset(&sv_addr, 0, sizeof(sv_addr));
+	//memset(&sv_addr, 0, sizeof(sv_addr));
 	sv_addr.sin_family = AF_INET;
 	sv_addr.sin_addr.s_addr = INADDR_ANY;
-	sv_addr.sin_port = PORT;
+    sv_addr.sin_port = htons(PORT);
+    bzero(&(sv_addr.sin_zero), 8);
 
 
 
-	if (!bind(accept_sock, (struct sockaddr *) &sv_addr, sizeof(sv_addr)))
-		puts("erro no bind");
+//    if (bind(accept_sock, (struct sockaddr *) &sv_addr, sizeof(sv_addr)) < 0) {
+//		puts("erro no bind");
+//    }
 
+    if (bind(accept_sock, (struct sockaddr *) &sv_addr, sizeof(sv_addr)) < 0)
+        printf("ERRO bindando");
 
 	listen(accept_sock, 5);
 
 	len = sizeof(cl_addr);
 
 
-	sock = accept(accept_sock, &cl_addr, len);
-	if (sock < 0)
+	if ((sock = accept(accept_sock,(struct sockaddr *) &cl_addr, &len)) == -1)
 		{
 			puts("erro no accept") ;
 		}
+        
+    bzero(buffer, BUFFER_SIZE);
 
-	ret = recvfrom(sock, buffer, BUFFER_SIZE, 0, NULL, NULL);
 
 
-	if (ret > 0)
-	{
-		buffer[ret] = '\0';
-		puts(buffer);
-	}
-	else
-	{
-		puts("não leu nada");
-	}
+
+    ret = read(sock, buffer, BUFFER_SIZE);
+    if (ret < 0)
+    printf("ERRO lendo do socket");
+    printf("Mensagem lida: %s\n", buffer);
+    
+    ret = write(sock,"Recebi sua mensagem!", BUFFER_SIZE);
+    if (ret < 0)
+    printf("ERRO escrevendo no socket");
+    
+    close(sock);
+    close(accept_sock);
+    return 0;
 
 
 
