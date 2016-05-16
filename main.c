@@ -9,6 +9,7 @@
 
 int main(int argc, char** argv)
 {
+
 	int accept;
 
 	accept = socket(AF_INET, SOCK_STREAM, 0);
