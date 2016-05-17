@@ -157,6 +157,8 @@ void * receiveMessage(void * id_void)
   				{
    					//puts("exit");
   					clients[id].used = false;
+  					strcpy(sendmsg, "exit");
+  					return 0;
   				}
   				else
   				{
@@ -183,7 +185,7 @@ void * receiveMessage(void * id_void)
 	   			for(int i=0; i<=MAX_CLIENTS; i++)
 	   			{
 	   				if (clients[i].used == true && !strcmp(clients[i].room, clients[id].room) && (i != id))
-	   					send(clients[i].socket, sendmsg, sizeof(sendmsg), NULL);
+	   					write(clients[i].socket, sendmsg, sizeof(sendmsg));
 	   			}
 
    			}
