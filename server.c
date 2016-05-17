@@ -28,7 +28,7 @@ typedef struct
 
 sem_t room_m;
 
-char help_msg[170] = "help: \n/nick <nick> to change nickname \n/join <room_name> to join a room\n/newr <room_name> to create a new chat room\n/quit to quit the room\n/exit to exit program";
+char help_msg[256] = "help: \n/nick <nick> to change nickname \n/join <room_name> to join a room\n/newr <room_name> to create a new chat room\n/list to list users in current room\n/quit to quit the room\n/exit to exit program";
 client* clients;
 char rooms[MAX_ROOMS][NAME_LENGTH];
 int room_amount = 1;
