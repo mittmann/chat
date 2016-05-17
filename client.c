@@ -18,7 +18,7 @@ void * receiveMessage(void * socket) {
     char buffer[BUFSIZE];    
     char dest[256];
 
-    sockfd = (int) socket;
+    sockfd = (intptr_t) socket;
     
     while(1) {
 
@@ -47,7 +47,7 @@ void * sendMessage(void * socket)
   int sockfd, n;
     char comando[15];
 
-  sockfd = (int) socket;
+  sockfd = (intptr_t) socket;
 
   while (1)
     {
@@ -115,10 +115,10 @@ int main (int argc, char **argv) {
 
     sem_init(&screen_m, 0, 0);
 
-    if (pthread_create(&thread1, NULL, receiveMessage, (void *) sockfd))
+    if (pthread_create(&thread1, NULL, receiveMessage, (void *)(intptr_t) sockfd))
       puts("erro no pthread_create");
 
-    if (pthread_create(&thread2, NULL, sendMessage, (void *) sockfd))
+    if (pthread_create(&thread2, NULL, sendMessage, (void *)(intptr_t) sockfd))
       puts("erro no pthread_create");
 
 

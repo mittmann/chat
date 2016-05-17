@@ -36,7 +36,7 @@ int room_amount = 1;
 
 void * receiveMessage(void * id_void) 
 {
-	int sockfd, ret, id, j;
+	int sockfd, ret, id, j, i;
 	char buffer[BUFFER_SIZE];
 	char sendmsg[BUFFER_SIZE + NAME_LENGTH+2];
 	char comando[15];
@@ -44,7 +44,7 @@ void * receiveMessage(void * id_void)
 	bool exit = false;
 
 
-	id = (int) id_void;
+	id = (intptr_t) id_void;
 	sockfd = clients[id].socket;
 	  bzero(sendmsg, BUFFER_SIZE + NAME_LENGTH + 2);
 
@@ -91,7 +91,7 @@ void * receiveMessage(void * id_void)
   						else
   						{
 
-  							if (ret-7 < NAME_LENGTH)
+  							if (ret-7 < NAME_LENGTH && ret-7>0)
   							{
 		  						strncpy(rooms[room_amount], buffer + 6, ret-7);
 		  						rooms[room_amount][ret-7] = '\0';
@@ -103,7 +103,7 @@ void * receiveMessage(void * id_void)
 							}
 							else
 							{	
-  								strcpy(sendmsg, "Room name too long.");
+  								strcpy(sendmsg, "Room name length invalid.");
 							}
   						}
   					sem_post(&room_m);
@@ -188,7 +188,7 @@ void * receiveMessage(void * id_void)
 	   			strcat(sendmsg, buffer);
 
 
-	   			for(int i=0; i<=MAX_CLIENTS; i++)
+	   			for(i=0; i<=MAX_CLIENTS; i++)
 	   			{
 	   				if (clients[i].used == true && !strcmp(clients[i].room, clients[id].room) && (i != id))
 	   					write(clients[i].socket, sendmsg, sizeof(sendmsg));
@@ -266,7 +266,7 @@ int main(int argc, char** argv)
 
 
 
-		if (pthread_create(threads + id, NULL, receiveMessage, (void *) id))
+		if (pthread_create(threads + id, NULL, receiveMessage, (void *)(intptr_t) id))
 			puts("erro no pthread_create");
 	}
 
