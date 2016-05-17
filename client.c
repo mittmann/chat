@@ -31,7 +31,6 @@ void * receiveMessage(void * socket) {
                 printf("ERRO lendo do socket\n");
         
             printf("%s\n",buffer);
-            puts ("entrei aqui");
     }
 //        ret = recvfrom(sockfd, buffer, BUFSIZE, 0, NULL, NULL);
 //        
@@ -100,7 +99,7 @@ int main (int argc, char **argv) {
 //    n = read(sockfd, buffer, BUFSIZE);
 //    if (n < 0)
 //        printf("ERRO lendo do socket\n");
-    
+//    
 //    printf("%s\n",buffer);
 
     }
