@@ -29,7 +29,8 @@ void * receiveMessage(void * socket) {
             ret = read(sockfd, buffer, BUFSIZE);
             if (ret < 0)
                 printf("ERRO lendo do socket\n");
-        
+        if ((memcmp(buffer, "exit", ret) == 0))
+                exit(0);
             printf("%s\n",buffer);
     }
 //        ret = recvfrom(sockfd, buffer, BUFSIZE, 0, NULL, NULL);
