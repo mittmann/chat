@@ -14,23 +14,35 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <ncurses.h>
 
 #define BUFSIZE 2048
+int exitprogram=0;
 
 void * receiveMessage(void * socket) {
     int sockfd, ret;
     char buffer[BUFSIZE];
-    
+   // int y, x;            // to store where you are
+
     
     sockfd = (int) socket;
     
     while(1) {
-//        bzero(buffer, BUFSIZE);
+            bzero(buffer, BUFSIZE);
             ret = read(sockfd, buffer, BUFSIZE);
             if (ret < 0)
                 printf("ERRO lendo do socket\n");
         
-            printf("%s\n",buffer);
+//        getyx(stdscr, y, x); // save current pos
+//        move(y, 0);          // move to begining of line
+//        clrtoeol();
+        if (!strcmp(buffer,"exit")) {
+            exitprogram=1;
+            exit(0);
+        }
+        printf("%s",buffer);
+        bzero(buffer, BUFSIZE);
+
     }
 //        ret = recvfrom(sockfd, buffer, BUFSIZE, 0, NULL, NULL);
 //        
@@ -51,8 +63,7 @@ int main (int argc, char **argv) {
     char *hostname;
     char buffer[BUFSIZE];
     pthread_t thread = malloc(sizeof(pthread_t));
-
-    
+    int thrjoin=-1;
     if (argc != 3) {
         fprintf(stderr, "uso: %s <endereço>, <porta>\n", argv[0]);
         exit(0);
@@ -84,9 +95,9 @@ int main (int argc, char **argv) {
 
     if (pthread_create(thread, NULL, receiveMessage, (void *) sockfd))
       puts("erro no pthread_create");
-    while (1)
+    while (!exitprogram)
     {
-    printf("Escrever a mensagem: ");
+  //  printf("Escrever a mensagem: ");
     bzero(buffer, BUFSIZE);
     fgets(buffer, BUFSIZE, stdin);
     
@@ -95,16 +106,15 @@ int main (int argc, char **argv) {
         printf("ERRO escrevendo no socket\n");
         
         bzero(buffer,BUFSIZE);
-        
-//    n = read(sockfd, buffer, BUFSIZE);
-//    if (n < 0)
-//        printf("ERRO lendo do socket\n");
-//    
-//    printf("%s\n",buffer);
+  //  n = read(sockfd, buffer, BUFSIZE);
+  //  if (n < 0)
+  //      printf("ERRO lendo do socket\n");
+    
+ //   printf("%s\n",buffer);
 
     }
     
-    
+    puts("dsgijgdse");
     close(sockfd);
     return 0;
 
