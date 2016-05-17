@@ -7,15 +7,53 @@
 #include <netinet/in.h>
 #include <semaphore.h>
 
-#define BUFFER_SIZE 2048
-#define PORT 55555
+#define BUFFER_SIZE 204
+#define MAX_CLIENTS 20
+
+
+void * receiveMessage(void * socket) {
+ int sockfd, ret;
+ char buffer[BUFFER_SIZE]; 
+
+ puts("memes");
+
+
+ sockfd = (int) socket;
+
+ while(1) {
+ 	 bzero(buffer, BUFFER_SIZE);
+
+
+  ret = recvfrom(sockfd, buffer, BUFFER_SIZE, 0, NULL, NULL);  
+
+  if (ret < 0) {  
+   printf("Error receiving data!\n");    
+  } else {
+   printf("client: ");
+   puts(buffer);
+  }  
+ }
+}
 
 int main(int argc, char** argv)
 {
 
-	int accept_sock, sock, ret, len;
-	char buffer[BUFFER_SIZE];
+	int accept_sock, sock, ret, len, port;
 	struct sockaddr_in sv_addr, cl_addr;
+	pthread_t* threads = malloc(MAX_CLIENTS*(sizeof(pthread_t)));
+
+	int amount = 0;
+
+
+
+	if (argc != 2)
+	{
+		puts("usage: ./server <port>");
+		return -1;
+	}
+	port = atoi(argv[1]);
+
+
 
     if ((accept_sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
         printf("ERRO abrindo socket");
@@ -24,7 +62,7 @@ int main(int argc, char** argv)
 	//memset(&sv_addr, 0, sizeof(sv_addr));
 	sv_addr.sin_family = AF_INET;
 	sv_addr.sin_addr.s_addr = INADDR_ANY;
-    sv_addr.sin_port = htons(PORT);
+    sv_addr.sin_port = htons(port);
     bzero(&(sv_addr.sin_zero), 8);
 
 
@@ -40,26 +78,24 @@ int main(int argc, char** argv)
 
 	len = sizeof(cl_addr);
 
-
+	while(1){
 	if ((sock = accept(accept_sock,(struct sockaddr *) &cl_addr, &len)) == -1)
 		{
 			puts("erro no accept") ;
 		}
-        
-    bzero(buffer, BUFFER_SIZE);
+
+
+		if (pthread_create(threads + amount, NULL, receiveMessage, (void *) sock))
+			puts("erro no pthread_create");
+
+
+		amount++;
+	}
 
 
 
 
-    ret = read(sock, buffer, BUFFER_SIZE);
-    if (ret < 0)
-    printf("ERRO lendo do socket");
-    printf("Mensagem lida: %s\n", buffer);
-    
-    ret = write(sock,"Recebi sua mensagem!", BUFFER_SIZE);
-    if (ret < 0)
-    printf("ERRO escrevendo no socket");
-    
+
     close(sock);
     close(accept_sock);
     return 0;

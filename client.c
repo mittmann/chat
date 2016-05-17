@@ -15,21 +15,21 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
-#define BUFSIZE 1024
-#define PORT 55555
+#define BUFSIZE 2048
 
 int main (int argc, char **argv) {
-    int sockfd, n;
+    int sockfd, n, port;
     struct sockaddr_in serv_addr;
     struct hostent *server;
     char *hostname;
     char buffer[BUFSIZE];
     
-    if (argc != 2) {
-        fprintf(stderr, "uso: %s <endereço>\n", argv[0]);
+    if (argc != 3) {
+        fprintf(stderr, "uso: %s <endereço>, <porta>\n", argv[0]);
         exit(0);
     }
     hostname = argv[1];
+    port = argv [2];
     
     puts ( "teste");
     server = gethostbyname(hostname);
@@ -46,7 +46,7 @@ int main (int argc, char **argv) {
     puts ( "teste3");
 
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(PORT);
+    serv_addr.sin_port = htons(port);
     serv_addr.sin_addr = *((struct in_addr *)server->h_addr);
     bzero(&(serv_addr.sin_zero), 8);
     
@@ -55,6 +55,9 @@ int main (int argc, char **argv) {
         exit(0);
     }
     
+
+    while (1)
+    {
     printf("Escrever a mensagem: ");
     bzero(buffer, BUFSIZE);
     fgets(buffer, BUFSIZE, stdin);
@@ -62,6 +65,7 @@ int main (int argc, char **argv) {
     n = write(sockfd, buffer, strlen(buffer));
     if (n < 0)
         printf("ERRO escrevendo no socket\n");
+    }
     
     bzero(buffer,BUFSIZE);
     
