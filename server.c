@@ -15,7 +15,6 @@ void * receiveMessage(void * socket) {
  int sockfd, ret;
  char buffer[BUFFER_SIZE]; 
 
- puts("memes");
 
 
  sockfd = (int) socket;
