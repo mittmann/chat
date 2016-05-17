@@ -1,11 +1,3 @@
-//
-//  client.c
-//  
-//
-//  Created by Matheus Stefanello Luz on 5/16/16.
-//
-//
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,7 +30,6 @@ void * receiveMessage(void * socket) {
 
               return 0;
             }
-
             
             printf("%s",buffer);
             sem_post(&screen_m);            
