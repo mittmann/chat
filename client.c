@@ -10,13 +10,14 @@
 
 
 #define BUFSIZE 2048
-
+int flagquit=0;
 sem_t screen_m;
 
 void * receiveMessage(void * socket) {
     int sockfd, ret;
     char buffer[BUFSIZE];    
-    
+    char dest[256];
+
     sockfd = (int) socket;
     
     while(1) {
@@ -24,11 +25,15 @@ void * receiveMessage(void * socket) {
             ret = read(sockfd, buffer, BUFSIZE);
             if (ret < 0)
                 printf("ERRO lendo do socket\n");
+        strncpy(dest, buffer,4);
+        dest[5] = 0;
+        
+        if((!strcmp("exit", dest)) && flagquit)
+        {
+            
+            exit(0);
+        }
 
-         if(!strcmp("exit\n", buffer))
-            {
-              return 0;
-            }
             
             printf("%s",buffer);
             sem_post(&screen_m);            
@@ -40,6 +45,7 @@ void * sendMessage(void * socket)
 {
   char buffer[BUFSIZE];
   int sockfd, n;
+    char comando[15];
 
   sockfd = (int) socket;
 
@@ -51,8 +57,17 @@ void * sendMessage(void * socket)
     sem_wait(&screen_m);
     fgets(buffer, BUFSIZE, stdin);
     sem_post(&screen_m);
+        
+        if (buffer[0] == '/') //aqui ele vai processar os comandos
+        {
+            strncpy(comando, buffer + sizeof(char), 4);
 
-    
+            if (!(strcmp ("exit", comando)))
+            {
+                flagquit=1;
+            }
+        }
+
     n = write(sockfd, buffer, strlen(buffer));
     if (n < 0)
         printf("ERRO escrevendo no socket\n");
