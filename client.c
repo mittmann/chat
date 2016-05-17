@@ -14,33 +14,37 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <semaphore.h>
+
 
 #define BUFSIZE 2048
 
+sem_t screen_m;
+
 void * receiveMessage(void * socket) {
     int sockfd, ret;
-    char buffer[BUFSIZE];
-    
+    char buffer[BUFSIZE];    
     
     sockfd = (int) socket;
     
     while(1) {
-//        bzero(buffer, BUFSIZE);
+
             ret = read(sockfd, buffer, BUFSIZE);
             if (ret < 0)
                 printf("ERRO lendo do socket\n");
         
-            printf("%s\n",buffer);
+
+         if(!strcmp("exit", buffer))
+            {  
+
+              return 0;
+            }
+
+            sem_wait(&screen_m);
+            printf("%s",buffer);
+            sem_post(&screen_m);            
     }
-//        ret = recvfrom(sockfd, buffer, BUFSIZE, 0, NULL, NULL);
-//        
-//        if (ret < 0) {
-//            printf("Error receiving data!\n");
-//        } else if (ret > 0){
-//            printf("server: ");
-//            puts(buffer);
-//        }  
-//    }
+
 }
 
 void * sendMessage(void * socket)
@@ -52,20 +56,19 @@ void * sendMessage(void * socket)
 
   while (1)
     {
-  //  printf("Escrever a mensagem: ");
+
     bzero(buffer, BUFSIZE);
+    usleep(100);
+    sem_wait(&screen_m);
     fgets(buffer, BUFSIZE, stdin);
+    sem_post(&screen_m);
+
     
     n = write(sockfd, buffer, strlen(buffer));
     if (n < 0)
         printf("ERRO escrevendo no socket\n");
         
         bzero(buffer,BUFSIZE);
-  //  n = read(sockfd, buffer, BUFSIZE);
-  //  if (n < 0)
-  //      printf("ERRO lendo do socket\n");
-    
- //   printf("%s\n",buffer);
 
     }
 }
@@ -105,6 +108,8 @@ int main (int argc, char **argv) {
         printf("ERRO de conexão\n");
         exit(0);
     }    
+
+    sem_init(&screen_m, 0, 1);
 
     if (pthread_create(&thread1, NULL, receiveMessage, (void *) sockfd))
       puts("erro no pthread_create");
