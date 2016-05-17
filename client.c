@@ -19,23 +19,29 @@
 
 void * receiveMessage(void * socket) {
     int sockfd, ret;
-    char buffer[BUFFER_SIZE];
-    
+    char buffer[BUFSIZE];
     
     
     sockfd = (int) socket;
     
     while(1) {
-        bzero(buffer, BUFFER_SIZE);
-        ret = recvfrom(sockfd, buffer, BUFFER_SIZE, 0, NULL, NULL);
+//        bzero(buffer, BUFSIZE);
+            ret = read(sockfd, buffer, BUFSIZE);
+            if (ret < 0)
+                printf("ERRO lendo do socket\n");
         
-        if (ret < 0) {
-            printf("Error receiving data!\n");
-        } else if (ret > 0){
-            printf("server: ");
-            puts(buffer);
-        }  
+            printf("%s\n",buffer);
+            puts ("entrei aqui");
     }
+//        ret = recvfrom(sockfd, buffer, BUFSIZE, 0, NULL, NULL);
+//        
+//        if (ret < 0) {
+//            printf("Error receiving data!\n");
+//        } else if (ret > 0){
+//            printf("server: ");
+//            puts(buffer);
+//        }  
+//    }
 }
 
 
@@ -45,7 +51,7 @@ int main (int argc, char **argv) {
     struct hostent *server;
     char *hostname;
     char buffer[BUFSIZE];
-    pthread_t thread = malloc((sizeof(pthread_t));
+    pthread_t thread = malloc(sizeof(pthread_t));
 
     
     if (argc != 3) {
