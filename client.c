@@ -40,7 +40,7 @@ void * receiveMessage(void * socket) {
               return 0;
             }
 
-            sem_wait(&screen_m);
+            
             printf("%s",buffer);
             sem_post(&screen_m);            
     }
@@ -109,7 +109,7 @@ int main (int argc, char **argv) {
         exit(0);
     }    
 
-    sem_init(&screen_m, 0, 1);
+    sem_init(&screen_m, 0, 0);
 
     if (pthread_create(&thread1, NULL, receiveMessage, (void *) sockfd))
       puts("erro no pthread_create");
