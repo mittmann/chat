@@ -28,7 +28,7 @@ typedef struct
 
 sem_t room_m;
 char welcome_msg[100] = "Welcome to the chat. You are currently in the Lobby. Use the commands below to navigate\n";
-char help_msg[256] = "help: \n/nick <nick> to change nickname \n/join <room_name> to join a room\n/newr <room_name> to create a new chat room\n/list to list users in current room\n/quit to quit the room\n/exit to exit program";
+char help_msg[256] = "help: \n/nick <nick> to change nickname \n/join <room_name> to join a room\n/newr <room_name> to create a new chat room\n/list to list users in current room\n/quit to quit the room\n/exit to exit program\n";
 client* clients;
 char rooms[MAX_ROOMS][NAME_LENGTH];
 int room_amount = 1;
@@ -41,6 +41,7 @@ void * receiveMessage(void * id_void)
 	char sendmsg[BUFFER_SIZE + NAME_LENGTH+2];
 	char comando[15];
 	char auxname[NAME_LENGTH];
+	bool exit = false;
 
 
 	id = (int) id_void;
@@ -161,8 +162,8 @@ void * receiveMessage(void * id_void)
   				{
   					clients[id].used = false;
   					strcpy(sendmsg, "exit");
-  					return 0;
-  				}
+  					sendmsg[4] = '\0';
+  					exit = true;  				}
   				else
   				{
    					strcpy(sendmsg, help_msg);
@@ -170,6 +171,8 @@ void * receiveMessage(void * id_void)
   				}
 
   				 write(sockfd, sendmsg, sizeof(sendmsg));
+  				 if (exit)
+  				 	return 0;
 
   			}
 
