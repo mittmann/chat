@@ -32,10 +32,6 @@ void * receiveMessage(void * socket) {
             ret = read(sockfd, buffer, BUFSIZE);
             if (ret < 0)
                 printf("ERRO lendo do socket\n");
-        if ((memcmp(buffer, "exit", ret) == 0))
-                exit(0);
-            printf("%s\n",buffer);
-        
 
          if(!strcmp("exit", buffer))
             {  
@@ -43,6 +39,9 @@ void * receiveMessage(void * socket) {
               return 0;
             }
 
+            
+            printf("%s",buffer);
+            sem_post(&screen_m);            
     }
 
 }
@@ -109,7 +108,7 @@ int main (int argc, char **argv) {
         exit(0);
     }    
 
-    sem_init(&screen_m, 0, 1);
+    sem_init(&screen_m, 0, 0);
 
     if (pthread_create(&thread1, NULL, receiveMessage, (void *) sockfd))
       puts("erro no pthread_create");

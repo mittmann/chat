@@ -170,6 +170,7 @@ void * receiveMessage(void * id_void)
 
   				}
 
+  				 strcat(sendmsg, "\n");
   				 write(sockfd, sendmsg, sizeof(sendmsg));
   				 if (exit)
   				 	return 0;
