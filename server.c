@@ -11,13 +11,14 @@
 #define BUFFER_SIZE 2048
 #define MAX_CLIENTS 20
 #define MAX_ROOMS 20
+#define NAME_LENGTH 25
 
 
 
 typedef struct 
 {
-	char nick[25];
-	char room[25];
+	char nick[NAME_LENGTH];
+	char room[NAME_LENGTH];
 	int socket;
 	bool used;
 	int id;
@@ -25,16 +26,19 @@ typedef struct
 
 
 
+sem_t room_m;
 
 char help_msg[170] = "help: \n/nick <nick> to change nickname \n/join <room_name> to join a room\n/newr <room_name> to create a new chat room\n/quit to quit the room\n/exit to exit program";
 client* clients;
+char rooms[MAX_ROOMS][NAME_LENGTH];
+int room_amount;
 
 
 void * receiveMessage(void * id_void) 
 {
 	int sockfd, ret, id;
 	char buffer[BUFFER_SIZE];
-	char sendmsg[BUFFER_SIZE + 27];
+	char sendmsg[BUFFER_SIZE + NAME_LENGTH+2];
 	char comando[15];
 
 
@@ -55,25 +59,40 @@ void * receiveMessage(void * id_void)
   		{
   			if (buffer[0] == '/')
   			{
-	   			bzero(sendmsg, BUFFER_SIZE + 27);
+	   			bzero(sendmsg, BUFFER_SIZE + NAME_LENGTH + 2);
   				strncpy(comando, buffer + sizeof(char), 4);
 
   				if (!(strcmp ("nick", comando)))
   				{	
-  					puts("nick");
-  					if(sizeof(buffer+5) < 25)
+  					//puts("nick");
+  					if(sizeof(buffer+6) < NAME_LENGTH)
   					{
   						strncpy(clients[id].nick, buffer + 6, ret-7);
   						clients[id].nick[ret-7] = '\0';
   						strcpy(sendmsg, "Nick changed successfully");
   					}
   					else
-  						strcpy(sendmsg, "Nickname too big. Maximum size is 24 letters");
+  						strcpy(sendmsg, "Nickname too big.");
 
   				}
   				else if (!(strcmp ("newr", comando)))
   				{
-  					puts("new room");
+  					//puts("new room");
+  					sem_wait(&room_m);
+  						if (room_amount >= MAX_ROOMS)
+  							strcpy(sendmsg, "Can't create more rooms");
+  						else
+  						{
+	  						strncpy(rooms[room_amount], buffer + 6, ret-7);
+	  						rooms[room_amount][ret-7] = '\0';
+	  						strncpy(clients[id].room, buffer + 6, ret-7);
+  							clients[id].room[ret-7] = '\0';
+	  						strcpy(sendmsg, "Room created successfully. Now on room ");
+							strcat(sendmsg, clients[id].room);
+  						}
+  					sem_post(&room_m);
+
+
 				}
   				else if (!(strcmp ("join", comando)))
   				{
@@ -85,7 +104,8 @@ void * receiveMessage(void * id_void)
   				}
   				else if (!(strcmp ("exit", comando)))
   				{
-   					puts("exit"); 					
+   					//puts("exit");
+  					clients[id].used = false;
   				}
   				else
   				{
@@ -101,7 +121,7 @@ void * receiveMessage(void * id_void)
   			{
 
 
-	   			bzero(sendmsg, BUFFER_SIZE + 27);
+	   			bzero(sendmsg, BUFFER_SIZE + NAME_LENGTH + 2);
 
 
 	   			strcat(sendmsg, clients[id].nick);
@@ -111,7 +131,7 @@ void * receiveMessage(void * id_void)
 
 	   			for(int i=0; i<=MAX_CLIENTS; i++)
 	   			{
-	   				if (clients[i].used == true)
+	   				if (clients[i].used == true && !strcmp(clients[i].room, clients[id].room))
 	   					send(clients[i].socket, sendmsg, sizeof(sendmsg), NULL);
 	   			}
 
@@ -135,6 +155,8 @@ int main(int argc, char** argv)
 		return -1;
 	}
 	port = atoi(argv[1]);
+
+	sem_init(&room_m, 0, 1);
 
 
 
