@@ -33,7 +33,7 @@ void * receiveMessage(void * socket) {
             if (ret < 0)
                 printf("ERRO lendo do socket\n");
 
-         if(!strcmp("exit", buffer))
+         if(!strcmp("exit\n", buffer))
             {  
 
               return 0;
