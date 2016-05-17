@@ -108,16 +108,16 @@ void * receiveMessage(void * id_void)
   					if (j>=room_amount)
   					{
   						strcpy(sendmsg, "Could not find room with given name. Existing rooms: ");
-  						for(j=0; j<room_amount - 1; j++)
+  						for(j=0; j<room_amount; j++)
   						{
   							strcat(sendmsg, rooms[j]);
-  							strcat(sendmsg, ", ");
+  							strcat(sendmsg, "\n");
   						}
   							strcat(sendmsg, rooms[room_amount-1]);
-  					}
   					else
   					{
   						strncpy(clients[id].room, buffer + 6, ret-7);
+  						clients[id].room[ret-7] = '\0';
   						strcpy(sendmsg, "Entered room");
 
   					}
@@ -129,6 +129,21 @@ void * receiveMessage(void * id_void)
    					puts("quit");
    					strcpy(clients[id].room, "Lobby");
    					strcpy(sendmsg, "Successfully quit to lobby");
+  				}
+  				else if (!(strcmp ("list", comando)))
+  				{
+  					strcpy(sendmsg, "List of users in room ");
+  					strcat(sendmsg, clients[id].room);
+  					strcat(sendmsg, ":\n");
+  					for (j=0; j<MAX_CLIENTS; j++)
+  					{
+  						if (!strcmp(clients[j].room, clients[id].room) && clients[j].used)
+  							{
+  								strcat(sendmsg, clients[j].nick);
+  								strcat(sendmsg, "\n");
+  							}
+  					}
+
   				}
   				else if (!(strcmp ("exit", comando)))
   				{
