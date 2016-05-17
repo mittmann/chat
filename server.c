@@ -9,16 +9,22 @@
 
 #define BUFFER_SIZE 2048
 #define MAX_CLIENTS 20
+#define MAX_ROOMS 20
+
+
+
+typedef struct 
+{
+	char nick[25];
+	char room[25];
+	int socket;
+}client;
 
 
 
 
-
-
-
-
-char help_msg[128] = "help: \n/nick <nick> to change nickname \n/join <room_name> to join a room\n/quit to quit the room\n/exit to exit program";
-int* cl_sockets;
+char help_msg[170] = "help: \n/nick <nick> to change nickname \n/join <room_name> to join a room\n/newr <room_name> to create a new chat room\n/quit to quit the room\n/exit to exit program";
+client* clients;
 int amount = 0;
 
 
@@ -51,6 +57,10 @@ void * receiveMessage(void * socket)
   				{	
   					puts("nick");
   				}
+  				else if (!(strcmp ("newr", comando)))
+  				{
+  					puts("new room");
+				}
   				else if (!(strcmp ("join", comando)))
   				{
   					puts("join");
@@ -77,7 +87,7 @@ void * receiveMessage(void * socket)
    			printf("client: ");
    			for(int i=0; i<=amount; i++)
    			{
-   				send(cl_sockets[i], buffer, ret, NULL);
+   				send(clients[i].socket, buffer, ret, NULL);
    			}
    			puts(buffer);
    		}
@@ -91,7 +101,7 @@ int main(int argc, char** argv)
 	int accept_sock, sock, ret, len, port, i;
 	struct sockaddr_in sv_addr, cl_addr;
 	pthread_t* threads = malloc(MAX_CLIENTS*(sizeof(pthread_t)));
-	cl_sockets = malloc(MAX_CLIENTS*(sizeof(int)));
+	clients = malloc(MAX_CLIENTS*(sizeof(client)));
 
 	if (argc != 2)
 	{
@@ -126,7 +136,9 @@ int main(int argc, char** argv)
 			puts("erro no accept") ;
 		}
 
-		cl_sockets[amount] = sock;
+		clients[amount].socket = sock;
+		strcpy(clients[amount].nick, "xXxLeozin sk8xXx 420");
+		strcpy(clients[amount].room, "sexo");
 
 
 		if (pthread_create(threads + amount, NULL, receiveMessage, (void *) sock))
@@ -139,7 +151,7 @@ int main(int argc, char** argv)
 
 
 	for(i=0; i<=amount; i++)
-		close(cl_sockets[i]);
+		close(clients[i].socket);
     close(sock);
     close(accept_sock);
     return 0;
