@@ -16,7 +16,8 @@
 
 
 
-//char help_msg[] = 
+
+char help_msg[128] = "help: \n/nick <nick> to change nickname \n/join <room_name> to join a room\n/quit to quit the room\n/exit to exit program";
 int* cl_sockets;
 int amount = 0;
 
@@ -26,7 +27,6 @@ void * receiveMessage(void * socket)
 	int sockfd, ret;
 	char buffer[BUFFER_SIZE]; 
 	char comando[15];
-	//char 
 
 
 
@@ -65,11 +65,11 @@ void * receiveMessage(void * socket)
   				}
   				else if (!(strcmp ("help", comando)))
   				{
-  					puts("help");  					
+  					send(sockfd, help_msg, sizeof(help_msg));
   				}
   				else
   				{
-  					 puts("else");
+   					send(sockfd, help_msg, sizeof(help_msg));
 
   				}
 
