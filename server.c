@@ -162,8 +162,9 @@ void * receiveMessage(void * id_void)
   				{
   					clients[id].used = false;
   					strcpy(sendmsg, "exit");
-  					sendmsg[4] = '\0';
-  					exit = true;  				}
+  					sendmsg[5] = '\0';
+  					exit = true;  				
+  				}
   				else
   				{
    					strcpy(sendmsg, help_msg);

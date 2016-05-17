@@ -27,8 +27,7 @@ void * receiveMessage(void * socket) {
         
 
          if(!strcmp("exit\n", buffer))
-            {  
-
+            {
               return 0;
             }
             
