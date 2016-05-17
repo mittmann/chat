@@ -50,7 +50,7 @@ void * receiveMessage(void * id_void)
 
 
 
-  		ret = recvfrom(sockfd, buffer, BUFFER_SIZE, 0, NULL, NULL);  
+  		ret = read(sockfd, buffer, BUFFER_SIZE);  
 
   		if (ret < 0) 
   		{  
@@ -66,14 +66,14 @@ void * receiveMessage(void * id_void)
   				if (!(strcmp ("nick", comando)))
   				{	
   					//puts("nick");
-  					if(sizeof(buffer+6) < NAME_LENGTH)
+  					if(ret-7 < NAME_LENGTH)
   					{
   						strncpy(clients[id].nick, buffer + 6, ret-7);
   						clients[id].nick[ret-7] = '\0';
   						strcpy(sendmsg, "Nick changed successfully");
   					}
   					else
-  						strcpy(sendmsg, "Nickname too big.");
+  						strcpy(sendmsg, "Nickname too long.");
 
   				}
   				else if (!(strcmp ("newr", comando)))
@@ -84,13 +84,21 @@ void * receiveMessage(void * id_void)
   							strcpy(sendmsg, "Can't create more rooms");
   						else
   						{
-	  						strncpy(rooms[room_amount], buffer + 6, ret-7);
-	  						rooms[room_amount][ret-7] = '\0';
-	  						strncpy(clients[id].room, buffer + 6, ret-7);
-  							clients[id].room[ret-7] = '\0';
-	  						strcpy(sendmsg, "Room created successfully. Now on room ");
-							strcat(sendmsg, clients[id].room);
-							room_amount++;
+
+  							if (ret-7 < NAME_LENGTH)
+  							{
+		  						strncpy(rooms[room_amount], buffer + 6, ret-7);
+		  						rooms[room_amount][ret-7] = '\0';
+		  						strncpy(clients[id].room, buffer + 6, ret-7);
+	  							clients[id].room[ret-7] = '\0';
+		  						strcpy(sendmsg, "Room created successfully. Now on room ");
+								strcat(sendmsg, clients[id].room);
+								room_amount++;
+							}
+							else
+							{	
+  								strcpy(sendmsg, "Room name too long.");
+							}
   						}
   					sem_post(&room_m);
 
@@ -107,13 +115,13 @@ void * receiveMessage(void * id_void)
   					}
   					if (j>=room_amount)
   					{
-  						strcpy(sendmsg, "Could not find room with given name. Existing rooms: ");
+  						strcpy(sendmsg, "Could not find room with given name. Existing rooms: \n");
   						for(j=0; j<room_amount; j++)
   						{
   							strcat(sendmsg, rooms[j]);
   							strcat(sendmsg, "\n");
   						}
-  							strcat(sendmsg, rooms[room_amount-1]);
+  						}
   					else
   					{
   						strncpy(clients[id].room, buffer + 6, ret-7);
@@ -156,7 +164,7 @@ void * receiveMessage(void * id_void)
 
   				}
 
-  				 send(sockfd, sendmsg, sizeof(sendmsg), NULL);
+  				 write(sockfd, sendmsg, sizeof(sendmsg));
 
   			}
 
