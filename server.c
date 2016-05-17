@@ -9,6 +9,8 @@
 
 #define BUFFER_SIZE 204
 #define MAX_CLIENTS 20
+int* cl_sockets;
+int amount = 0;
 
 
 void * receiveMessage(void * socket) {
@@ -29,6 +31,10 @@ void * receiveMessage(void * socket) {
    printf("Error receiving data!\n");    
   } else if (ret > 0){
    printf("client: ");
+   for(int i=0; i<=amount; i++)
+   {
+   	send(cl_sockets + i, buffer, ret, NULL);
+   }
    puts(buffer);
   }  
  }
@@ -40,8 +46,8 @@ int main(int argc, char** argv)
 	int accept_sock, sock, ret, len, port;
 	struct sockaddr_in sv_addr, cl_addr;
 	pthread_t* threads = malloc(MAX_CLIENTS*(sizeof(pthread_t)));
+	cl_sockets = malloc(MAX_CLIENTS*(sizeof(int)));
 
-	int amount = 0;
 
 
 
@@ -83,10 +89,11 @@ int main(int argc, char** argv)
 			puts("erro no accept") ;
 		}
 
+		cl_sockets[amount] = sock;
+
 
 		if (pthread_create(threads + amount, NULL, receiveMessage, (void *) sock))
 			puts("erro no pthread_create");
-
 
 		amount++;
 	}
