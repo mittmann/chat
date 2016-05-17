@@ -7,43 +7,90 @@
 #include <netinet/in.h>
 #include <semaphore.h>
 
-#define BUFFER_SIZE 204
+#define BUFFER_SIZE 2048
 #define MAX_CLIENTS 20
+
+
+
+
+
+
+
+//char help_msg[] = 
 int* cl_sockets;
 int amount = 0;
 
 
-void * receiveMessage(void * socket) {
- int sockfd, ret;
- char buffer[BUFFER_SIZE]; 
+void * receiveMessage(void * socket) 
+{
+	int sockfd, ret;
+	char buffer[BUFFER_SIZE]; 
+	char comando[15];
+	//char 
 
 
 
- sockfd = (int) socket;
+	sockfd = (int) socket;
+	while(1) {
+ 		bzero(buffer, BUFFER_SIZE);
 
- while(1) {
- 	 bzero(buffer, BUFFER_SIZE);
+
+  		ret = recvfrom(sockfd, buffer, BUFFER_SIZE, 0, NULL, NULL);  
+
+  		if (ret < 0) 
+  		{  
+   			printf("Error receiving data!\n");    
+  		}
+  		else if (ret > 0)
+  		{
+  			if (buffer[0] == '/')
+  			{
+  				strncpy(comando, buffer + sizeof(char), 4);
+
+  				if (!(strcmp ("nick", comando)))
+  				{	
+  					puts("nick");
+  				}
+  				else if (!(strcmp ("join", comando)))
+  				{
+  					puts("join");
+				}
+  				else if (!(strcmp ("quit", comando)))
+  				{
+   					puts("quit"); 					
+  				}
+  				else if (!(strcmp ("exit", comando)))
+  				{
+   					puts("exit"); 					
+  				}
+  				else if (!(strcmp ("help", comando)))
+  				{
+  					puts("help");  					
+  				}
+  				else
+  				{
+  					 puts("else");
+
+  				}
 
 
-  ret = recvfrom(sockfd, buffer, BUFFER_SIZE, 0, NULL, NULL);  
+  		}
 
-  if (ret < 0) {  
-   printf("Error receiving data!\n");    
-  } else if (ret > 0){
-   printf("client: ");
-   for(int i=0; i<=amount; i++)
-   {
-   	send(cl_sockets + i, buffer, ret, NULL);
-   }
-   puts(buffer);
-  }  
- }
+   			printf("client: ");
+   			for(int i=0; i<=amount; i++)
+   			{
+   				send(cl_sockets + i, buffer, ret, NULL);
+   			}
+   			puts(buffer);
+   		}
+	}
 }
+
 
 int main(int argc, char** argv)
 {
 
-	int accept_sock, sock, ret, len, port;
+	int accept_sock, sock, ret, len, port, i;
 	struct sockaddr_in sv_addr, cl_addr;
 	pthread_t* threads = malloc(MAX_CLIENTS*(sizeof(pthread_t)));
 	cl_sockets = malloc(MAX_CLIENTS*(sizeof(int)));
@@ -64,17 +111,12 @@ int main(int argc, char** argv)
         printf("ERRO abrindo socket");
 
 
-	//memset(&sv_addr, 0, sizeof(sv_addr));
 	sv_addr.sin_family = AF_INET;
 	sv_addr.sin_addr.s_addr = INADDR_ANY;
     sv_addr.sin_port = htons(port);
     bzero(&(sv_addr.sin_zero), 8);
 
 
-
-//    if (bind(accept_sock, (struct sockaddr *) &sv_addr, sizeof(sv_addr)) < 0) {
-//		puts("erro no bind");
-//    }
 
     if (bind(accept_sock, (struct sockaddr *) &sv_addr, sizeof(sv_addr)) < 0)
         printf("ERRO bindando");
@@ -101,7 +143,8 @@ int main(int argc, char** argv)
 
 
 
-
+	for(i=0; i<=amount; i++)
+		close(cl_sockets[i]);
     close(sock);
     close(accept_sock);
     return 0;
