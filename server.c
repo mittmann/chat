@@ -27,7 +27,7 @@ void * receiveMessage(void * socket) {
 
   if (ret < 0) {  
    printf("Error receiving data!\n");    
-  } else {
+  } else if (ret > 0){
    printf("client: ");
    puts(buffer);
   }  
