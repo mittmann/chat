@@ -17,12 +17,36 @@
 
 #define BUFSIZE 2048
 
+void * receiveMessage(void * socket) {
+    int sockfd, ret;
+    char buffer[BUFFER_SIZE];
+    
+    
+    
+    sockfd = (int) socket;
+    
+    while(1) {
+        bzero(buffer, BUFFER_SIZE);
+        ret = recvfrom(sockfd, buffer, BUFFER_SIZE, 0, NULL, NULL);
+        
+        if (ret < 0) {
+            printf("Error receiving data!\n");
+        } else if (ret > 0){
+            printf("server: ");
+            puts(buffer);
+        }  
+    }
+}
+
+
 int main (int argc, char **argv) {
     int sockfd, n, port;
     struct sockaddr_in serv_addr;
     struct hostent *server;
     char *hostname;
     char buffer[BUFSIZE];
+    pthread_t thread = malloc((sizeof(pthread_t));
+
     
     if (argc != 3) {
         fprintf(stderr, "uso: %s <endereço>, <porta>\n", argv[0]);
@@ -53,6 +77,8 @@ int main (int argc, char **argv) {
         exit(0);
     }    
 
+    if (pthread_create(thread, NULL, receiveMessage, (void *) sockfd))
+      puts("erro no pthread_create");
     while (1)
     {
     printf("Escrever a mensagem: ");
@@ -62,15 +88,17 @@ int main (int argc, char **argv) {
     n = write(sockfd, buffer, strlen(buffer));
     if (n < 0)
         printf("ERRO escrevendo no socket\n");
+        
+        bzero(buffer,BUFSIZE);
+        
+//    n = read(sockfd, buffer, BUFSIZE);
+//    if (n < 0)
+//        printf("ERRO lendo do socket\n");
+    
+//    printf("%s\n",buffer);
+
     }
     
-    bzero(buffer,BUFSIZE);
-    
-    n = read(sockfd, buffer, BUFSIZE);
-    if (n < 0)
-        printf("ERRO lendo do socket\n");
-    
-    printf("%s\n",buffer);
     
     close(sockfd);
     return 0;
