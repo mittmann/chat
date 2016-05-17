@@ -93,9 +93,6 @@ int main(int argc, char** argv)
 	pthread_t* threads = malloc(MAX_CLIENTS*(sizeof(pthread_t)));
 	cl_sockets = malloc(MAX_CLIENTS*(sizeof(int)));
 
-	puts(help_msg);
-
-
 	if (argc != 2)
 	{
 		puts("usage: ./server <port>");
