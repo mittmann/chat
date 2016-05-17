@@ -162,7 +162,7 @@ void * receiveMessage(void * id_void)
   				{
   					clients[id].used = false;
   					strcpy(sendmsg, "exit");
-  					sendmsg[5] = '\0';
+  					sendmsg[4] = '\0';
   					exit = true;  				
   				}
   				else
@@ -171,7 +171,7 @@ void * receiveMessage(void * id_void)
 
   				}
 
-  				 strcat(sendmsg, "\n");
+  				 strcat(sendmsg, "\n\0");
   				 write(sockfd, sendmsg, sizeof(sendmsg));
   				 if (exit)
   				 	return 0;
