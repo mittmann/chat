@@ -65,21 +65,19 @@ void * receiveMessage(void * socket)
   				}
   				else if (!(strcmp ("help", comando)))
   				{
-  					send(sockfd, help_msg, sizeof(help_msg));
+  					send(sockfd, help_msg, sizeof(help_msg), NULL);
   				}
   				else
   				{
-   					send(sockfd, help_msg, sizeof(help_msg));
+   					send(sockfd, help_msg, sizeof(help_msg), NULL);
 
   				}
-
-
-  		}
+  			}
 
    			printf("client: ");
    			for(int i=0; i<=amount; i++)
    			{
-   				send(cl_sockets + i, buffer, ret, NULL);
+   				send(cl_sockets[i], buffer, ret, NULL);
    			}
    			puts(buffer);
    		}
@@ -95,7 +93,7 @@ int main(int argc, char** argv)
 	pthread_t* threads = malloc(MAX_CLIENTS*(sizeof(pthread_t)));
 	cl_sockets = malloc(MAX_CLIENTS*(sizeof(int)));
 
-
+	puts(help_msg);
 
 
 	if (argc != 2)
