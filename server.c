@@ -27,7 +27,7 @@ typedef struct
 
 
 sem_t room_m;
-
+char welcome_msg[100] = "Welcome to the chat. You are currently in the Lobby. Use the commands below to navigate\n";
 char help_msg[256] = "help: \n/nick <nick> to change nickname \n/join <room_name> to join a room\n/newr <room_name> to create a new chat room\n/list to list users in current room\n/quit to quit the room\n/exit to exit program";
 client* clients;
 char rooms[MAX_ROOMS][NAME_LENGTH];
@@ -45,6 +45,13 @@ void * receiveMessage(void * id_void)
 
 	id = (int) id_void;
 	sockfd = clients[id].socket;
+	  bzero(sendmsg, BUFFER_SIZE + NAME_LENGTH + 2);
+
+	strcpy(sendmsg, welcome_msg);
+	strcat(sendmsg, help_msg);
+  	write(sockfd, sendmsg, sizeof(sendmsg));
+
+
 	while(1) {
  		bzero(buffer, BUFFER_SIZE);
 
@@ -58,14 +65,13 @@ void * receiveMessage(void * id_void)
   		}
   		else if (ret > 0)
   		{
-  			if (buffer[0] == '/')
+  			if (buffer[0] == '/') //aqui ele vai processar os comandos
   			{
 	   			bzero(sendmsg, BUFFER_SIZE + NAME_LENGTH + 2);
   				strncpy(comando, buffer + sizeof(char), 4);
 
   				if (!(strcmp ("nick", comando)))
   				{	
-  					//puts("nick");
   					if(ret-7 < NAME_LENGTH)
   					{
   						strncpy(clients[id].nick, buffer + 6, ret-7);
@@ -78,7 +84,6 @@ void * receiveMessage(void * id_void)
   				}
   				else if (!(strcmp ("newr", comando)))
   				{
-  					//puts("new room");
   					sem_wait(&room_m);
   						if (room_amount >= MAX_ROOMS)
   							strcpy(sendmsg, "Can't create more rooms");
@@ -134,7 +139,6 @@ void * receiveMessage(void * id_void)
 				}
   				else if (!(strcmp ("quit", comando)))
   				{
-   					puts("quit");
    					strcpy(clients[id].room, "Lobby");
    					strcpy(sendmsg, "Successfully quit to lobby");
   				}
@@ -155,7 +159,6 @@ void * receiveMessage(void * id_void)
   				}
   				else if (!(strcmp ("exit", comando)))
   				{
-   					//puts("exit");
   					clients[id].used = false;
   					strcpy(sendmsg, "exit");
   					return 0;
@@ -175,8 +178,6 @@ void * receiveMessage(void * id_void)
 
 
 	   			bzero(sendmsg, BUFFER_SIZE + NAME_LENGTH + 2);
-
-
 	   			strcat(sendmsg, clients[id].nick);
 	   			strcat(sendmsg, ": ");
 	   			strcat(sendmsg, buffer);
@@ -199,7 +200,8 @@ int main(int argc, char** argv)
 
 	int accept_sock, sock, ret, len, port, i, id;
 	struct sockaddr_in sv_addr, cl_addr;
-	pthread_t* threads = malloc(MAX_CLIENTS*(sizeof(pthread_t)));
+	char itoa[5];
+	pthread_t* threads = malloc(MAX_CLIENTS*(sizeof(pthread_t))); //aloca as threads que podem ser usadas para gerenciar cada cliente
 	clients = malloc(MAX_CLIENTS*(sizeof(client)));
 
 	if (argc != 2)
@@ -248,7 +250,10 @@ int main(int argc, char** argv)
 
 
 		clients[id].socket = sock;
-		strcpy(clients[id].nick, "xXxL30z1nSk8x420");
+		strcpy(clients[id].nick, "guest");
+		sprintf(itoa, "%d", id);
+		strcat(clients[id].nick, itoa); //appends the id to the nickname
+
 		strcpy(clients[id].room, "Lobby");
 		clients[id].id = id;
 		clients[id].used = true;
