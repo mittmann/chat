@@ -6,6 +6,7 @@
 #include <string.h>
 #include <netinet/in.h>
 #include <semaphore.h>
+#include <stdbool.h>
 
 #define BUFFER_SIZE 2048
 #define MAX_CLIENTS 20
@@ -18,6 +19,8 @@ typedef struct
 	char nick[25];
 	char room[25];
 	int socket;
+	bool used;
+	int id;
 }client;
 
 
@@ -25,20 +28,21 @@ typedef struct
 
 char help_msg[170] = "help: \n/nick <nick> to change nickname \n/join <room_name> to join a room\n/newr <room_name> to create a new chat room\n/quit to quit the room\n/exit to exit program";
 client* clients;
-int amount = 0;
 
 
-void * receiveMessage(void * socket) 
+void * receiveMessage(void * id_void) 
 {
-	int sockfd, ret;
-	char buffer[BUFFER_SIZE]; 
+	int sockfd, ret, id;
+	char buffer[BUFFER_SIZE];
+	char sendmsg[BUFFER_SIZE + 27];
 	char comando[15];
 
 
-
-	sockfd = (int) socket;
+	id = (int) id_void;
+	sockfd = clients[id].socket;
 	while(1) {
  		bzero(buffer, BUFFER_SIZE);
+
 
 
   		ret = recvfrom(sockfd, buffer, BUFFER_SIZE, 0, NULL, NULL);  
@@ -51,11 +55,21 @@ void * receiveMessage(void * socket)
   		{
   			if (buffer[0] == '/')
   			{
+	   			bzero(sendmsg, BUFFER_SIZE + 27);
   				strncpy(comando, buffer + sizeof(char), 4);
 
   				if (!(strcmp ("nick", comando)))
   				{	
   					puts("nick");
+  					if(sizeof(buffer+5) < 25)
+  					{
+  						strncpy(clients[id].nick, buffer + 6, ret-7);
+  						clients[id].nick[ret-7] = '\0';
+  						strcpy(sendmsg, "Nick changed successfully");
+  					}
+  					else
+  						strcpy(sendmsg, "Nickname too big. Maximum size is 24 letters");
+
   				}
   				else if (!(strcmp ("newr", comando)))
   				{
@@ -73,23 +87,35 @@ void * receiveMessage(void * socket)
   				{
    					puts("exit"); 					
   				}
-  				else if (!(strcmp ("help", comando)))
-  				{
-  					send(sockfd, help_msg, sizeof(help_msg), NULL);
-  				}
   				else
   				{
-   					send(sockfd, help_msg, sizeof(help_msg), NULL);
+   					strcpy(sendmsg, help_msg);
 
   				}
+
+  				 send(sockfd, sendmsg, sizeof(sendmsg), NULL);
+
   			}
 
-   			printf("client: ");
-   			for(int i=0; i<=amount; i++)
-   			{
-   				send(clients[i].socket, buffer, ret, NULL);
+  			else
+  			{
+
+
+	   			bzero(sendmsg, BUFFER_SIZE + 27);
+
+
+	   			strcat(sendmsg, clients[id].nick);
+	   			strcat(sendmsg, ": ");
+	   			strcat(sendmsg, buffer);
+
+
+	   			for(int i=0; i<=MAX_CLIENTS; i++)
+	   			{
+	   				if (clients[i].used == true)
+	   					send(clients[i].socket, sendmsg, sizeof(sendmsg), NULL);
+	   			}
+
    			}
-   			puts(buffer);
    		}
 	}
 }
@@ -98,7 +124,7 @@ void * receiveMessage(void * socket)
 int main(int argc, char** argv)
 {
 
-	int accept_sock, sock, ret, len, port, i;
+	int accept_sock, sock, ret, len, port, i, id;
 	struct sockaddr_in sv_addr, cl_addr;
 	pthread_t* threads = malloc(MAX_CLIENTS*(sizeof(pthread_t)));
 	clients = malloc(MAX_CLIENTS*(sizeof(client)));
@@ -136,21 +162,31 @@ int main(int argc, char** argv)
 			puts("erro no accept") ;
 		}
 
-		clients[amount].socket = sock;
-		strcpy(clients[amount].nick, "xXxLeozin sk8xXx 420");
-		strcpy(clients[amount].room, "sexo");
+
+		id = 0;
+		while (clients[id].used)
+		{
+			id++;
+		}
 
 
-		if (pthread_create(threads + amount, NULL, receiveMessage, (void *) sock))
+		clients[id].socket = sock;
+		strcpy(clients[id].nick, "xXxL30z1nSk8x420");
+		strcpy(clients[id].room, "sexo");
+		clients[id].id = id;
+		clients[id].used = true;
+
+
+
+
+		if (pthread_create(threads + id, NULL, receiveMessage, (void *) id))
 			puts("erro no pthread_create");
-
-		amount++;
 	}
 
 
 
 
-	for(i=0; i<=amount; i++)
+	for(i=0; i<=MAX_CLIENTS; i++)
 		close(clients[i].socket);
     close(sock);
     close(accept_sock);
