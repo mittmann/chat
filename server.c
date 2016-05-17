@@ -31,15 +31,16 @@ sem_t room_m;
 char help_msg[170] = "help: \n/nick <nick> to change nickname \n/join <room_name> to join a room\n/newr <room_name> to create a new chat room\n/quit to quit the room\n/exit to exit program";
 client* clients;
 char rooms[MAX_ROOMS][NAME_LENGTH];
-int room_amount;
+int room_amount = 1;
 
 
 void * receiveMessage(void * id_void) 
 {
-	int sockfd, ret, id;
+	int sockfd, ret, id, j;
 	char buffer[BUFFER_SIZE];
 	char sendmsg[BUFFER_SIZE + NAME_LENGTH+2];
 	char comando[15];
+	char auxname[NAME_LENGTH];
 
 
 	id = (int) id_void;
@@ -89,6 +90,7 @@ void * receiveMessage(void * id_void)
   							clients[id].room[ret-7] = '\0';
 	  						strcpy(sendmsg, "Room created successfully. Now on room ");
 							strcat(sendmsg, clients[id].room);
+							room_amount++;
   						}
   					sem_post(&room_m);
 
@@ -96,11 +98,37 @@ void * receiveMessage(void * id_void)
 				}
   				else if (!(strcmp ("join", comando)))
   				{
-  					puts("join");
+  					j=0;
+  					strcpy(auxname, buffer+6);
+  					auxname[ret-7] = '\0';
+  					while(strcmp(rooms[j], auxname) && j<room_amount)
+  					{
+  						j++;
+  					}
+  					if (j>=room_amount)
+  					{
+  						strcpy(sendmsg, "Could not find room with given name. Existing rooms: ");
+  						for(j=0; j<room_amount - 1; j++)
+  						{
+  							strcat(sendmsg, rooms[j]);
+  							strcat(sendmsg, ", ");
+  						}
+  							strcat(sendmsg, rooms[room_amount-1]);
+  					}
+  					else
+  					{
+  						strncpy(clients[id].room, buffer + 6, ret-7);
+  						strcpy(sendmsg, "Entered room");
+
+  					}
+
+
 				}
   				else if (!(strcmp ("quit", comando)))
   				{
-   					puts("quit"); 					
+   					puts("quit");
+   					strcpy(clients[id].room, "Lobby");
+   					strcpy(sendmsg, "Successfully quit to lobby");
   				}
   				else if (!(strcmp ("exit", comando)))
   				{
@@ -131,7 +159,7 @@ void * receiveMessage(void * id_void)
 
 	   			for(int i=0; i<=MAX_CLIENTS; i++)
 	   			{
-	   				if (clients[i].used == true && !strcmp(clients[i].room, clients[id].room))
+	   				if (clients[i].used == true && !strcmp(clients[i].room, clients[id].room) && (i != id))
 	   					send(clients[i].socket, sendmsg, sizeof(sendmsg), NULL);
 	   			}
 
@@ -157,6 +185,8 @@ int main(int argc, char** argv)
 	port = atoi(argv[1]);
 
 	sem_init(&room_m, 0, 1);
+
+	strcpy(rooms[0], "Lobby");
 
 
 
@@ -194,7 +224,7 @@ int main(int argc, char** argv)
 
 		clients[id].socket = sock;
 		strcpy(clients[id].nick, "xXxL30z1nSk8x420");
-		strcpy(clients[id].room, "sexo");
+		strcpy(clients[id].room, "Lobby");
 		clients[id].id = id;
 		clients[id].used = true;
 
